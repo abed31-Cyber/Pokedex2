@@ -71,6 +71,15 @@ function createPokemonItem(pokemonData) {
 
     pokemonCard.setAttribute('pokemon-id', pokemonData.id);
     console.log(pokemonCard)
+
+    pokemonCard.addEventListener("click", async () => {
+        const pokemonIdOnClick = pokemonCard.getAttribute("pokemon-id");
+        console.log("Id du pokemon clické : ", pokemonIdOnClick);
+        const pokemonClickData = await getPokemonById(pokemonIdOnClick);
+        const pokemonClickTypesImg = await getPokemonTypesImgs(pokemonClickData);
+        displayPokemonInfo(pokemonClickData, pokemonClickTypesImg);
+    })
+
     return pokemonCard;
 
 
@@ -80,22 +89,33 @@ function createPokemonItem(pokemonData) {
 async function displayPokemonInfo(pokemonData, pokemonTypesImgs) {
     // Récupération de la div parente
     const pokemonInfoParentDiv = document.querySelector(".pokemon-infos");
-    // Récupération des elements
-    const pokemonInfoId_elem = document.querySelector(".pokemon-info-id");
-    const pokemonInfoImage_elem = document.querySelector(".pokemon-info-image");
-    const pokemonInfoName_elem = document.querySelector(".pokemon-info-name");
+    // Nettoyage de la div parente
+    pokemonInfoParentDiv.innerHTML = "";
+    // Création des sous div
+    const pokemonInfoTypesImgDiv = document.createElement("div");
+    // Création des elements
+    const pokemonInfoId_elem = document.createElement("p");
+    const pokemonInfoImage_elem = document.createElement("img");
+    const pokemonInfoName_elem = document.createElement("h1");
+    // Classes css
+    pokemonInfoId_elem.classList.add("pokemon-info-id");
+    pokemonInfoImage_elem.classList.add("pokemon-info-image");
+    pokemonInfoName_elem.classList.add("pokemon-info-name");
+    pokemonInfoTypesImgDiv.classList.add("pokemon-types-img-containe");
 
-    // Récupération de la div parente des img de types
-    const pokemonInfoTypesImgDiv = document.querySelector(".pokemon-types-img-container");
 
     // Insertion des données dans les elements
     pokemonInfoId_elem.innerText = pokemonData.id;
     pokemonInfoImage_elem.setAttribute("src", pokemonData.image);
     pokemonInfoName_elem.innerText = pokemonData.name;
 
+    // Insertions des elements dans la div parente
+    pokemonInfoParentDiv.appendChild(pokemonInfoId_elem);
+    pokemonInfoParentDiv.appendChild(pokemonInfoImage_elem);
+    pokemonInfoParentDiv.appendChild(pokemonInfoName_elem);
+
     // Remove display none sur le text Types
-    const pokemonInfoTypeText_elem = document.querySelector(".pokemon-info-type-text");
-    pokemonInfoTypeText_elem.classList.remove("invisible");
+
     // Insertion des données dans la div types
     console.log(pokemonTypesImgs);
     pokemonTypesImgs.forEach(img => {
@@ -106,7 +126,13 @@ async function displayPokemonInfo(pokemonData, pokemonTypesImgs) {
 
     // Evolutions
     // Récupération de la div parente Evolution
-    const pokemonInfoEvolutionParentDiv = document.querySelector(".pokemon-evolution");
+    // const pokemonInfoEvolutionParentDiv = document.querySelector(".pokemon-evolution");
+    // Création de la div parente évo
+    const pokemonInfoEvolutionParentDiv = document.createElement("div");
+    // Ajout de la classe
+    pokemonInfoEvolutionParentDiv.classList.add("pokemon-evolution");
+    // Insertion de la div d'évo dans la div info
+    pokemonInfoParentDiv.appendChild(pokemonInfoEvolutionParentDiv);
     // Récupération des données de l'évolution
     const pokemonEvoData = await getPokemonEvolutionData(pokemonData);
     // Récupération de la card item
@@ -116,25 +142,49 @@ async function displayPokemonInfo(pokemonData, pokemonTypesImgs) {
 
 }
 
-function displayPokemonList(pokemonData_arr){
+function displayPokemonList(pokemonData_arr) {
     // Récupération de la div parente
     const pokemonItems_div = document.querySelector(".pokemon-items");
     pokemonData_arr.forEach(pokemon => {
-     const pokemonItem = createPokemonItem(pokemon);
-     pokemonItems_div.appendChild(pokemonItem);
+        const pokemonItem = createPokemonItem(pokemon);
+        pokemonItems_div.appendChild(pokemonItem);
     })
 }
 // debug
 
-async function debug() {
-    const pokemonData_arr = await get9Pokemon();
-    const pokemonData = await getPokemonById(1);
-    const pokemonTypesImg = await getPokemonTypesImgs(pokemonData);
-    console.log("donnée pokemon data: " + pokemonData);
-    createPokemonItem(pokemonData);
-    getPokemonEvolutionData(pokemonData);
-    getPokemonTypesImgs(pokemonData);
-    displayPokemonInfo(pokemonData, pokemonTypesImg);
-    displayPokemonList(pokemonData_arr);
+// async function debug() {
+//     const pokemonData_arr = await get9Pokemon();
+//     const pokemonData = await getPokemonById(1);
+//     const pokemonTypesImg = await getPokemonTypesImgs(pokemonData);
+//     console.log("donnée pokemon data: " + pokemonData);
+//     createPokemonItem(pokemonData);
+//     getPokemonEvolutionData(pokemonData);
+//     getPokemonTypesImgs(pokemonData);
+//     displayPokemonInfo(pokemonData, pokemonTypesImg);
+//     displayPokemonList(pokemonData_arr);
+// }
+// debug();
+
+// EXEC 
+async function main() {
+    // Affichage par recherche Pokémon
+    const searchForm = document.querySelector(".search-pokemon");
+    searchForm.addEventListener('submit', async function (event) {
+
+        event.preventDefault();
+
+        const formData = new FormData(searchForm);
+
+        const searchInput = formData.get('search-pokemon');
+        const pokemonData = await getPokemonById(searchInput);
+        const pokemonTypesImg = await getPokemonTypesImgs(pokemonData);
+
+        displayPokemonInfo(pokemonData, pokemonTypesImg);
+    })
+    // Affichage liste Pokémon
+    const allPokemonData = await get9Pokemon();
+    displayPokemonList(allPokemonData)
+
+
 }
-debug();
+main();
